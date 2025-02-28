@@ -107,7 +107,7 @@ struct AlbumDetailView: View {
                                             ),
                                             starSize: $smallStarSize,
                                             editable: .constant(false) // Make it non-editable
-                                        )
+                                        ).allowsHitTesting(false) // Should make it not interfere (I hope)
                                     }
                                     if !song.review.isEmpty {
                                         Text("“\(song.review)”")

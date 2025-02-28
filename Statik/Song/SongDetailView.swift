@@ -9,10 +9,12 @@
 import SwiftUI
 
 struct SongDetailView: View {
+    @Environment(\.dismiss) private var dismiss
     @State var song: Song
     @Binding var album: Album
     @State private var starSize: CGFloat = 20
     @State private var starEditable: Bool = true
+    @State private var review: String = ""
 
     var body: some View {
         VStack {
@@ -34,7 +36,7 @@ struct SongDetailView: View {
                 RatingView(rating: $song.grade, starSize: $starSize, editable: $starEditable)
             }
 
-            TextField("Write a review...", text: $song.review)
+            TextField("", text: $review, prompt: Text("Write a review..."))
                 .textFieldStyle(.roundedBorder)
                 .padding()
 
@@ -42,11 +44,28 @@ struct SongDetailView: View {
         }
         .padding()
         .navigationTitle(song.title)
-        .onDisappear {
+        .navigationBarBackButtonHidden(true)
+        .toolbar {
+                    ToolbarItem(placement: .topBarLeading) {
+                        Button("Cancel") {
+                            dismiss() // 🔹 Dismiss view without saving
+                        }
+                    }
+                    ToolbarItem(placement: .topBarTrailing) {
+                        Button("Save") {
+                            song.review = review
+                            dismiss()
+                        }
+                    }
+                    
+        }.onDisappear {
             if let index = album.songs.firstIndex(where: { $0.id == song.id }) {
                 album.songs[index] = song
             }
         }
+        .onAppear {
+                review = song.review.isEmpty ? "" : song.review
+            }
     }
 
     private func toggleLike() {
