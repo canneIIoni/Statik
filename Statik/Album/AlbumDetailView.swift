@@ -15,6 +15,7 @@ struct AlbumDetailView: View {
     @State private var selectedItem: PhotosPickerItem? = nil
     @State private var selectedImage: UIImage? = nil
     @State private var starSize: CGFloat = 25
+    @State private var smallStarSize: CGFloat = 17
     @State private var starEditable: Bool = false
 
     var body: some View {
@@ -99,6 +100,14 @@ struct AlbumDetailView: View {
                                     HStack {
                                         Text("\(song.title) ·")
                                             .font(.system(size: 20))
+                                        RatingView(
+                                            rating: Binding(
+                                                get: { song.grade },  // Get the song's grade
+                                                set: { song.grade = $0 } // Update the grade
+                                            ),
+                                            starSize: $smallStarSize,
+                                            editable: .constant(false) // Make it non-editable
+                                        )
                                     }
                                     if !song.review.isEmpty {
                                         Text("“\(song.review)”")
@@ -106,6 +115,7 @@ struct AlbumDetailView: View {
                                             .foregroundColor(.secondaryText)
                                             .multilineTextAlignment(.leading)
                                     }
+                                    
                                 }
                                 Spacer()
                                 if song.isLiked {
