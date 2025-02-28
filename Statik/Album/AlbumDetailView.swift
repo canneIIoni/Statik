@@ -97,11 +97,12 @@ struct AlbumDetailView: View {
                             HStack {
                                 VStack(alignment: .leading) {
                                     HStack {
-                                        Text(song.title)
+                                        Text("\(song.title) ·")
+                                            .font(.system(size: 20))
                                     }
                                     if !song.review.isEmpty {
                                         Text("“\(song.review)”")
-                                            .font(.subheadline)
+                                            .font(.system(size: 14))
                                             .foregroundColor(.secondaryText)
                                             .multilineTextAlignment(.leading)
                                     }
@@ -120,7 +121,14 @@ struct AlbumDetailView: View {
                 .padding(.trailing)
             }.padding(.leading, 15)
         }
-        .background(Color.background.ignoresSafeArea())
+        .background(
+            LinearGradient(
+                gradient: Gradient(colors: [Color.backgroundColorDark, Color.background]), // Adjust colors here
+                startPoint: .top,
+                endPoint: .center
+            )
+            .ignoresSafeArea()
+        )
         .onDisappear {
             try? modelContext.save()
         }
