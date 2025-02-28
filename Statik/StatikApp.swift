@@ -6,12 +6,14 @@
 //
 
 import SwiftUI
+import SwiftData
 
 @main
 struct StatikApp: App {
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            AlbumListView()
         }
+        .modelContainer(for: Album.self) 
     }
 }
