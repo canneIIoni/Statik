@@ -15,6 +15,7 @@ struct SongDetailView: View {
     @State private var starSize: CGFloat = 20
     @State private var starEditable: Bool = true
     @State private var review: String = ""
+    @State private var rating: Double = 0
 
     var body: some View {
         VStack {
@@ -48,6 +49,7 @@ struct SongDetailView: View {
         .toolbar {
                     ToolbarItem(placement: .topBarLeading) {
                         Button("Cancel") {
+                            song.grade = rating
                             dismiss() // 🔹 Dismiss view without saving
                         }
                     }
@@ -64,8 +66,9 @@ struct SongDetailView: View {
             }
         }
         .onAppear {
-                review = song.review.isEmpty ? "" : song.review
-            }
+            review = song.review.isEmpty ? "" : song.review
+            rating = song.grade
+        }
     }
 
     private func toggleLike() {
