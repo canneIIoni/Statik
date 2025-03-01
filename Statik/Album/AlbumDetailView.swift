@@ -94,7 +94,7 @@ struct AlbumDetailView: View {
                 
 
                 VStack(alignment: .leading) {
-                    ForEach(album.songs) { song in
+                    ForEach(album.songs.sorted { $0.trackNumber < $1.trackNumber }) { song in
                         NavigationLink(destination: SongDetailView(song: song, album: $album)) {
                             HStack {
                                 VStack(alignment: .leading) {
@@ -103,12 +103,12 @@ struct AlbumDetailView: View {
                                             .font(.system(size: 20))
                                         RatingView(
                                             rating: Binding(
-                                                get: { song.grade },  // Get the song's grade
-                                                set: { song.grade = $0 } // Update the grade
+                                                get: { song.grade },
+                                                set: { song.grade = $0 }
                                             ),
                                             starSize: $smallStarSize,
-                                            editable: .constant(false) // Make it non-editable
-                                        ).allowsHitTesting(false) // Should make it not interfere (I hope)
+                                            editable: .constant(false)
+                                        ).allowsHitTesting(false)
                                     }
                                     if !song.review.isEmpty {
                                         Text("“\(song.review)”")
@@ -116,7 +116,6 @@ struct AlbumDetailView: View {
                                             .foregroundColor(.secondaryText)
                                             .multilineTextAlignment(.leading)
                                     }
-                                    
                                 }
                                 Spacer()
                                 if song.isLiked {
@@ -125,12 +124,21 @@ struct AlbumDetailView: View {
                                 }
                             }
                         }
-                        .padding(.vertical, 8) // Add spacing between items
-                        Divider() 
+                        .padding(.vertical, 8)
+                        Divider()
                     }
                 }
                 .padding(.trailing)
             }.padding(.leading, 15)
+        }
+        .toolbar {
+            ToolbarItem(placement: .topBarTrailing) {
+                NavigationLink(destination: AlbumReviewView(album: album)) {
+                    Text("Log")
+                        .font(.system(size: 18, weight: .bold))
+                        .foregroundStyle(.systemRed)
+                }
+            }
         }
         .background(
             LinearGradient(

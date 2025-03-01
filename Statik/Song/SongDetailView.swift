@@ -125,6 +125,7 @@ struct SongDetailView: View {
             if let index = album.songs.firstIndex(where: { $0.id == song.id }) {
                 album.songs[index] = song
             }
+            
         }
         .onAppear {
             review = song.review.isEmpty ? "" : song.review
