@@ -16,6 +16,7 @@ struct SongDetailView: View {
     @State private var starEditable: Bool = true
     @State private var review: String = ""
     @State private var rating: Double = 0
+    @State private var showWarning = false
 
     var body: some View {
         VStack {
@@ -94,8 +95,13 @@ struct SongDetailView: View {
         .toolbar {
             ToolbarItem(placement: .topBarLeading) {
                 Button {
-                    song.grade = rating
-                    dismiss()
+                    if song.review != review || song.grade != rating {
+                        showWarning = true
+                    } else {
+                        song.grade = rating
+                        dismiss()
+                    }
+                    
                 } label: {
                     Text("Cancel")
                         .font(.system(size: 18, weight: .bold))
@@ -113,7 +119,16 @@ struct SongDetailView: View {
                 }
             }
             
-        }.background(
+        }.alert("Are you sure?", isPresented: $showWarning) {
+            Button("Cancel", role: .cancel) {}
+            Button("Confirm", role: .destructive) {
+                song.grade = rating
+                dismiss()
+            }
+        } message: {
+            Text("Unsaved changes might be lost.")
+        }
+        .background(
             LinearGradient(
                 gradient: Gradient(colors: [Color.backgroundColorDark, Color.background]), // Adjust colors here
                 startPoint: .top,
