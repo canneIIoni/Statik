@@ -16,6 +16,7 @@ struct SongDetailView: View {
     @State private var starEditable: Bool = true
     @State private var review: String = ""
     @State private var rating: Double = 0
+    @State private var like: Bool = false
     @State private var showWarning = false
 
     var body: some View {

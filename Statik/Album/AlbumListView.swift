@@ -22,14 +22,13 @@ struct AlbumListView: View {
                             if let image = album.albumImage {
                                 Image(uiImage: image)
                                     .resizable()
-                                    .scaledToFit()
-                                    .frame(width: 50, height: 50)
-                                    .clipShape(RoundedRectangle(cornerRadius: 5))
+                                    .frame(width: 65, height: 65)
+                                    .scaledToFill()
                             } else {
                                 Rectangle()
                                     .fill(Color.gray.opacity(0.3))
-                                    .frame(width: 50, height: 50)
-                                    .clipShape(RoundedRectangle(cornerRadius: 5))
+                                    .frame(width: 65, height: 65)
+                                    .overlay(Text("No Image").foregroundColor(.gray))
                             }
 
                             VStack(alignment: .leading) {
@@ -51,9 +50,28 @@ struct AlbumListView: View {
                 }
             }
             .navigationTitle("")
+            .background(
+                LinearGradient(
+                    gradient: Gradient(colors: [Color.backgroundColorDark, Color.background]), // Adjust colors here
+                    startPoint: .top,
+                    endPoint: .center
+                )
+                .ignoresSafeArea()
+            )
             .toolbar {
-                Button(action: addSampleAlbum) {
-                    Image(systemName: "plus")
+                ToolbarItem(placement: .topBarLeading) {
+                    Text("Statik")
+                        .font(.system(size: 25, weight: .bold))
+                        .foregroundStyle(.systemRed)
+                }
+                
+                ToolbarItem(placement: .topBarTrailing) {
+                    NavigationLink(destination: AlbumCreationView()) {
+                        Image(systemName: "plus")
+                    }
+//                    Button(action: addSampleAlbum) {
+//                        Image(systemName: "plus")
+//                    }
                 }
             }
         }
