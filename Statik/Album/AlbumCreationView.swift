@@ -107,20 +107,25 @@ struct AlbumCreationView: View {
                     if songs.isEmpty {
                         Text("No songs added").foregroundColor(.gray)
                     } else {
-                        List {
-                            ForEach(songs.sorted { $0.trackNumber < $1.trackNumber }) { song in
-                                HStack {
-                                    Text("\(song.trackNumber). \(song.title)")
-                                        .font(.system(size: 16))
-                                    Spacer()
-                                    Image(systemName: song.isLiked ? "heart.fill" : "heart")
-                                        .foregroundColor(song.isLiked ? .red : .gray)
+                        ZStack {
+                            Color.clear // Ensures the background is transparent
+                            List {
+                                ForEach(songs.sorted { $0.trackNumber < $1.trackNumber }) { song in
+                                    HStack {
+                                        Text("\(song.trackNumber). \(song.title)")
+                                            .font(.system(size: 16))
+                                        Spacer()
+                                        Image(systemName: song.isLiked ? "heart.fill" : "heart")
+                                            .foregroundColor(song.isLiked ? .red : .gray)
+                                    }
+                                    .listRowBackground(Color.clear)
                                 }
+                                .onDelete(perform: deleteSong)
                             }
-                            .onDelete(perform: deleteSong)
-                        }
-                        .frame(height: min(CGFloat(songs.count) * 44, 300)) // Adjust height to fit content
-                        .listStyle(.plain)
+                            .frame(height: min(CGFloat(songs.count) * 44, 300)) // Adjust height to fit content
+                            .listStyle(.plain)
+                            .background(Color.clear)
+                            .scrollContentBackground(.hidden)                         }
                     }
                     
                     Spacer()
