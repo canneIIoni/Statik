@@ -7,13 +7,10 @@
 
 
 import SwiftUI
-import PhotosUI
 
 struct AlbumDetailView: View {
     @Environment(\.modelContext) private var modelContext
     @State var album: Album
-    @State private var selectedItem: PhotosPickerItem? = nil
-    @State private var selectedImage: UIImage? = nil
     @State private var starSize: CGFloat = 25
     @State private var smallStarSize: CGFloat = 17
     @State private var starEditable: Bool = false
@@ -76,22 +73,6 @@ struct AlbumDetailView: View {
                         .foregroundStyle(.secondaryText)
                     Spacer()
                 }
-
-                PhotosPicker(selection: $selectedItem, matching: .images) {
-                    Text("Select Album Cover")
-                }
-                .padding()
-                .onChange(of: selectedItem) { newItem in
-                    Task {
-                        if let data = try? await newItem?.loadTransferable(type: Data.self),
-                           let image = UIImage(data: data) {
-                            selectedImage = image
-                            album.imageData = image.jpegData(compressionQuality: 0.8)
-                            try? modelContext.save()
-                        }
-                    }
-                }
-                
 
                 VStack(alignment: .leading) {
                     ForEach(album.songs.sorted { $0.trackNumber < $1.trackNumber }) { song in

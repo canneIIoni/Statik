@@ -22,6 +22,7 @@ struct AlbumCreationView: View {
 
     var body: some View {
         NavigationStack {
+            ScrollView {
             VStack(alignment: .leading) {
                 HStack {
                     PhotosPicker(selection: $selectedItem, matching: .images) {
@@ -99,41 +100,42 @@ struct AlbumCreationView: View {
                 
                 Spacer()
             }
-            .padding()
-            .background(
-                LinearGradient(
-                    gradient: Gradient(colors: [Color.backgroundColorDark, Color.background]),
-                    startPoint: .top,
-                    endPoint: .center
+            
+        }.padding()
+                .background(
+                    LinearGradient(
+                        gradient: Gradient(colors: [Color.backgroundColorDark, Color.background]),
+                        startPoint: .top,
+                        endPoint: .center
+                    )
+                    .ignoresSafeArea()
                 )
-                .ignoresSafeArea()
-            )
-            .navigationBarBackButtonHidden(true)
-            .toolbar {
-                ToolbarItem(placement: .topBarLeading) {
-                    Button {
-                        dismiss()
-                    } label: {
-                        Text("Cancel")
-                            .font(.system(size: 18, weight: .bold))
-                            .foregroundStyle(.secondaryText)
+                .navigationBarBackButtonHidden(true)
+                .toolbar {
+                    ToolbarItem(placement: .topBarLeading) {
+                        Button {
+                            dismiss()
+                        } label: {
+                            Text("Cancel")
+                                .font(.system(size: 18, weight: .bold))
+                                .foregroundStyle(.secondaryText)
+                        }
+                    }
+                    ToolbarItem(placement: .topBarTrailing) {
+                        Button {
+                            addAlbum()
+                            dismiss()
+                        } label: {
+                            Text("Save")
+                                .font(.system(size: 18, weight: .bold))
+                                .foregroundStyle(.systemRed)
+                        }
                     }
                 }
-                ToolbarItem(placement: .topBarTrailing) {
-                    Button {
-                        addAlbum()
-                        dismiss()
-                    } label: {
-                        Text("Save")
-                            .font(.system(size: 18, weight: .bold))
-                            .foregroundStyle(.systemRed)
-                    }
+                .onTapGesture {
+                    hideKeyboard()
                 }
-            }
-            .onTapGesture {
-                hideKeyboard()
-            }
-        }
+    }
     }
     
     private func addAlbum() {
