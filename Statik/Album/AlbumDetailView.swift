@@ -133,7 +133,7 @@ struct AlbumDetailView: View {
         }
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
-                NavigationLink(destination: AlbumReviewView(album: album)) {
+                NavigationLink(destination: AlbumReviewView(album: $album)) {
                     Text("Log")
                         .font(.system(size: 18, weight: .bold))
                         .foregroundStyle(.systemRed)

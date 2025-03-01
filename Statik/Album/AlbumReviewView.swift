@@ -10,11 +10,12 @@ import SwiftUI
 struct AlbumReviewView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.modelContext) private var modelContext
-    @State var album: Album
+    @Binding var album: Album
     @State private var starSize: CGFloat = 37
     @State private var starEditable: Bool = true
     @State private var review: String = ""
     @State private var rating: Double = 0
+    @State private var showWarning = false
     
     var body: some View {
         VStack {
@@ -93,8 +94,15 @@ struct AlbumReviewView: View {
         .toolbar {
             ToolbarItem(placement: .topBarLeading) {
                 Button {
-                    album.grade = rating
-                    dismiss()
+                    print(album.review)
+                    print(review)
+                    print(album.grade)
+                    print(rating)
+                    if album.review != review || album.grade != rating {
+                        showWarning = true
+                    } else {
+                        dismiss()
+                    }
                 } label: {
                     Text("Cancel")
                         .font(.system(size: 18, weight: .bold))
@@ -104,6 +112,9 @@ struct AlbumReviewView: View {
             ToolbarItem(placement: .topBarTrailing) {
                 Button {
                     album.review = review
+                    rating = album.grade
+                    
+                    try? modelContext.save() // Ensure Core Data saves the changes
                     dismiss()
                 } label: {
                     Text("Save")
@@ -112,7 +123,18 @@ struct AlbumReviewView: View {
                 }
             }
             
-        }.background(
+        }.alert("Are you sure?", isPresented: $showWarning) {
+            Button("Cancel", role: .cancel) {}
+            Button("Confirm", role: .destructive) {
+                review = album.review
+                album.grade = rating
+                try? modelContext.save()
+                dismiss()
+            }
+        } message: {
+            Text("Unsaved changes might be lost.")
+        }
+        .background(
             LinearGradient(
                 gradient: Gradient(colors: [Color.backgroundColorDark, Color.background]), // Adjust colors here
                 startPoint: .top,
@@ -126,7 +148,7 @@ struct AlbumReviewView: View {
             try? modelContext.save()
         }
         .onAppear {
-            review = album.review.isEmpty ? "" : album.review
+            review = album.review
             rating = album.grade
         }
     }
