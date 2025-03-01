@@ -36,15 +36,25 @@ struct AddSongView: View {
                             .font(.system(size: 18, weight: .bold))
                             .foregroundStyle(.secondaryText)
                     }
-
+                    
                 }
                 ToolbarItem(placement: .topBarTrailing) {
                     Button {
-                        
+                        if let trackNum = Int(trackNumber) {
+                            let newSong = Song(title: title, isLiked: isLiked, grade: grade, review: review, trackNumber: trackNum)
+                            onAdd(newSong)
+                            dismiss()
+                        }
                     } label: {
-                        Text("Save")
-                            .font(.system(size: 18, weight: .bold))
-                            .foregroundStyle(.systemRed)
+                        if title.isEmpty || trackNumber.isEmpty {
+                            Text("Save")
+                                .font(.system(size: 18, weight: .bold))
+                                .foregroundStyle(.secondaryText)
+                        } else {
+                            Text("Save")
+                                .font(.system(size: 18, weight: .bold))
+                                .foregroundStyle(.systemRed)
+                        }
                     }
                     .disabled(title.isEmpty || trackNumber.isEmpty)
                 }

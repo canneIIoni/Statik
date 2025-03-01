@@ -48,6 +48,7 @@ struct AlbumListView: View {
                         }
                     }
                 }
+                .onDelete(perform: deleteAlbum) // Enables swipe-to-delete
             }
             .navigationTitle("")
             .background(
@@ -69,9 +70,6 @@ struct AlbumListView: View {
                     NavigationLink(destination: AlbumCreationView()) {
                         Image(systemName: "plus")
                     }
-//                    Button(action: addSampleAlbum) {
-//                        Image(systemName: "plus")
-//                    }
                 }
             }
         }

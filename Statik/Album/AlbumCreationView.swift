@@ -107,16 +107,20 @@ struct AlbumCreationView: View {
                     if songs.isEmpty {
                         Text("No songs added").foregroundColor(.gray)
                     } else {
-                        ForEach(songs, id: \.id) { song in
-                            HStack {
-                                Text("\(song.trackNumber). \(song.title)")
-                                    .font(.system(size: 16))
-                                Spacer()
-                                Image(systemName: song.isLiked ? "heart.fill" : "heart")
-                                    .foregroundColor(song.isLiked ? .red : .gray)
+                        List {
+                            ForEach(songs.sorted { $0.trackNumber < $1.trackNumber }) { song in
+                                HStack {
+                                    Text("\(song.trackNumber). \(song.title)")
+                                        .font(.system(size: 16))
+                                    Spacer()
+                                    Image(systemName: song.isLiked ? "heart.fill" : "heart")
+                                        .foregroundColor(song.isLiked ? .red : .gray)
+                                }
                             }
-                            .padding(.vertical, 5)
+                            .onDelete(perform: deleteSong)
                         }
+                        .frame(height: min(CGFloat(songs.count) * 44, 300)) // Adjust height to fit content
+                        .listStyle(.plain)
                     }
                     
                     Spacer()
@@ -166,6 +170,16 @@ struct AlbumCreationView: View {
         let album = Album(name: name, artist: artist, year: year, review: "", isLiked: false, grade: 0.0, image: selectedImage, songs: songs)
         modelContext.insert(album)
         try? modelContext.save()
+    }
+    
+    private func deleteSong(at offsets: IndexSet) {
+        for index in offsets {
+            let songToDelete = songs[index] // Get the song from the array
+            modelContext.delete(songToDelete) // Delete from SwiftData
+        }
+        
+        songs.remove(atOffsets: offsets) // Remove from the UI list
+        try? modelContext.save() // Save changes
     }
 }
 
