@@ -119,13 +119,13 @@ struct AlbumDetailView: View {
                                 }
                                 Spacer()
                                 if song.isLiked {
-                                    Image(systemName: "heart.fill")
+                                    Image(systemName: "heart.circle.fill")
                                         .foregroundColor(.systemRed)
                                 }
                             }
                         }
                         .padding(.vertical, 8) // Add spacing between items
-                        Divider() // Optional: Adds a subtle separator
+                        Divider() 
                     }
                 }
                 .padding(.trailing)

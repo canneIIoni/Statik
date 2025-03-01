@@ -42,29 +42,47 @@ struct SongDetailView: View {
                 
                 Spacer()
             }
-            .padding()
+            .padding(.bottom)
+            
+            Divider().padding(.bottom)
 
             HStack {
-                Text("Rating")
-                    .font(.system(size: 16, weight: .bold))
+                VStack(alignment: .leading) {
+                    Text("Rating")
+                        .font(.system(size: 16, weight: .bold))
+                    RatingView(rating: $song.grade, starSize: $starSize, editable: $starEditable)
+                }.padding(.bottom)
+                
                 Spacer()
-                Text("Liked")
-                    .font(.system(size: 16, weight: .bold))
-            }.padding(.horizontal)
+                
+                VStack(alignment: .center) {
+                    if song.isLiked {
+                        Text("Liked").font(.system(size: 16, weight: .bold))
+                    } else {
+                        Text("Like").font(.system(size: 16, weight: .bold))
+                    }
+                    Button(action: toggleLike) {
+                        Image(systemName: song.isLiked ? "heart.circle.fill" : "heart.circle")
+                            .foregroundColor(.systemRed)
+                            .font(.system(size: 37, weight: .bold))
+                    }.offset(y: 4)
+                }.padding(.bottom)
+                    
+            }
+            
+            Divider().padding(.bottom)
             
             HStack {
-                RatingView(rating: $song.grade, starSize: $starSize, editable: $starEditable)
+                Text("Review")
+                    .font(.system(size: 16, weight: .bold))
                 Spacer()
-                Button(action: toggleLike) {
-                    Image(systemName: song.isLiked ? "heart.fill" : "heart")
-                        .foregroundColor(.systemRed)
-                        .font(.system(size: 37, weight: .bold))
-                }
-            }.padding(.horizontal).padding(.bottom)
+            }
 
-            TextField("", text: $review, prompt: Text("Write a review..."))
-                .textFieldStyle(.roundedBorder)
-                .padding(.horizontal)
+            TextField("", text: $review, prompt: Text("Write a review..."), axis: .vertical)
+                .padding()
+                .background(RoundedRectangle(cornerRadius: 10).fill(Color.backgroundColorDark))
+                .lineLimit(6, reservesSpace: true)
+                
 
             Spacer()
         }
