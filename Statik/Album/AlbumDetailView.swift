@@ -38,6 +38,7 @@ struct AlbumDetailView: View {
                     VStack(alignment: .leading) {
                         Text("Album · \(album.year)")
                             .font(.caption)
+                            .foregroundStyle(.secondaryText)
 
                         Text(album.name)
                             .font(.system(size: 25, weight: .bold))
