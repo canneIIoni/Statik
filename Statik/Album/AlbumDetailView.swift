@@ -22,18 +22,18 @@ struct AlbumDetailView: View {
                 HStack {
                     
                     ImageComponent(album: $album, imageSize: $imageSize)
-
+                    
                     VStack(alignment: .leading) {
                         Text("Album · \(album.year)")
                             .font(.caption)
                             .foregroundStyle(.secondaryText)
-
+                        
                         Text(album.name)
                             .font(.system(size: 25, weight: .bold))
-
+                        
                         Text(album.artist)
                             .font(.system(size: 16))
-
+                        
                         HStack {
                             RatingView(rating: $album.grade, starSize: $starSize, editable: $starEditable)
                             if album.isLiked {
@@ -58,16 +58,19 @@ struct AlbumDetailView: View {
                     Spacer()
                 }.padding(.top, 20)
                 
-                VStack(alignment: .leading) {
-                    if album.isLogged {
-                        Text("Date Logged: \(returnDate(album.dateLogged ?? Date()))")
+                HStack {
+                    VStack(alignment: .leading) {
+                        if album.isLogged {
+                            Text("Date Logged: \(returnDate(album.dateLogged ?? Date()))")
+                                .font(.system(size: 14))
+                                .foregroundStyle(.secondaryText)
+                                .padding(.bottom, 5)
+                        }
+                        Text(album.review)
                             .font(.system(size: 14))
                             .foregroundStyle(.secondaryText)
-                            .padding(.bottom, 5)
                     }
-                    Text(album.review)
-                        .font(.system(size: 14))
-                        .foregroundStyle(.secondaryText)
+                    Spacer()
                 }
                 
                 VStack(alignment: .leading) {
