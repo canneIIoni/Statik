@@ -16,7 +16,8 @@ struct AlbumListView: View {
     @State private var sortOption: SortOption = .dateLogged // Default sorting by date
 
     enum SortOption: String, CaseIterable, Identifiable {
-        case alphabetical = "Alphabetical"
+        case artist = "Artist"
+        case album = "Album"
         case dateLogged = "Date Logged"
 
         var id: String { self.rawValue }
@@ -24,7 +25,9 @@ struct AlbumListView: View {
 
     var sortedAlbums: [Album] {
         switch sortOption {
-        case .alphabetical:
+        case .artist:
+            return albums.sorted { $0.artist.localizedCompare($1.artist) == .orderedAscending }
+        case .album:
             return albums.sorted { $0.name.localizedCompare($1.name) == .orderedAscending }
         case .dateLogged:
             return albums.sorted { $0.dateLogged ?? Date() > $1.dateLogged ?? Date() }
@@ -81,6 +84,12 @@ struct AlbumListView: View {
                     NavigationLink(destination: AlbumCreationView()) {
                         Image(systemName: "plus")
                     }
+                }
+            }
+        }.onAppear {
+            for album in albums {
+                if !album.isLogged {
+                    album.dateLogged = Date()
                 }
             }
         }
