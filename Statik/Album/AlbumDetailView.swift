@@ -14,23 +14,14 @@ struct AlbumDetailView: View {
     @State private var starSize: CGFloat = 25
     @State private var smallStarSize: CGFloat = 17
     @State private var starEditable: Bool = false
+    @State private var imageSize: CGFloat = 147
 
     var body: some View {
         ScrollView {
             VStack {
                 HStack {
                     
-                    if let image = album.albumImage {
-                        Image(uiImage: image)
-                            .resizable()
-                            .frame(width: 147, height: 147)
-                            .scaledToFill()
-                    } else {
-                        Rectangle()
-                            .fill(Color.gray.opacity(0.3))
-                            .frame(width: 147, height: 147)
-                            .overlay(Text("No Image").foregroundColor(.gray))
-                    }
+                    ImageComponent(album: $album, imageSize: $imageSize)
 
                     VStack(alignment: .leading) {
                         Text("Album · \(album.year)")
@@ -77,33 +68,7 @@ struct AlbumDetailView: View {
                 VStack(alignment: .leading) {
                     ForEach(album.songs.sorted { $0.trackNumber < $1.trackNumber }) { song in
                         NavigationLink(destination: SongDetailView(song: song, album: $album)) {
-                            HStack {
-                                VStack(alignment: .leading) {
-                                    HStack {
-                                        Text("\(song.title) ·")
-                                            .font(.system(size: 20))
-                                        RatingView(
-                                            rating: Binding(
-                                                get: { song.grade },
-                                                set: { song.grade = $0 }
-                                            ),
-                                            starSize: $smallStarSize,
-                                            editable: .constant(false)
-                                        ).allowsHitTesting(false)
-                                    }
-                                    if !song.review.isEmpty {
-                                        Text("“\(song.review)”")
-                                            .font(.system(size: 14))
-                                            .foregroundColor(.secondaryText)
-                                            .multilineTextAlignment(.leading)
-                                    }
-                                }
-                                Spacer()
-                                if song.isLiked {
-                                    Image(systemName: "heart.circle.fill")
-                                        .foregroundColor(.systemRed)
-                                }
-                            }
+                            SongComponentView(song: .constant(song), smallStarSize: .constant(17))
                         }
                         .padding(.vertical, 8)
                         Divider()

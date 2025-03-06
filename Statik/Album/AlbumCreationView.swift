@@ -18,6 +18,7 @@ struct AlbumCreationView: View {
     @State private var artist: String = ""
     @State private var year: String = "\(Calendar.current.component(.year, from: Date()))" // Default to current year
     @State private var isAddingSong: Bool = false
+    @State private var imageSize: CGFloat = 147
     
     let years: [String] = (1900...Calendar.current.component(.year, from: Date())).map { "\($0)" }
     
@@ -118,6 +119,7 @@ struct AlbumCreationView: View {
                                         Image(systemName: song.isLiked ? "heart.fill" : "heart")
                                             .foregroundColor(song.isLiked ? .red : .gray)
                                     }
+                                    .listRowSeparator(.hidden)
                                     .listRowBackground(Color.clear)
                                 }
                                 .onDelete(perform: deleteSong)
