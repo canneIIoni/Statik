@@ -13,6 +13,26 @@ struct AlbumListView: View {
     @Query private var albums: [Album] // Automatically fetches from SwiftData
     @State private var starSize: CGFloat = 25
     @State private var starEditable: Bool = false
+    @State private var sortOption: SortOption = .dateLogged // Default sorting by date
+
+    enum SortOption: String, CaseIterable, Identifiable {
+        case artist = "Artist"
+        case album = "Album"
+        case dateLogged = "Date Logged"
+
+        var id: String { self.rawValue }
+    }
+
+    var sortedAlbums: [Album] {
+        switch sortOption {
+        case .artist:
+            return albums.sorted { $0.artist.localizedCompare($1.artist) == .orderedAscending }
+        case .album:
+            return albums.sorted { $0.name.localizedCompare($1.name) == .orderedAscending }
+        case .dateLogged:
+            return albums.sorted { $0.dateLogged ?? Date() > $1.dateLogged ?? Date() }
+        }
+    }
 
     var body: some View {
         NavigationStack {
@@ -29,9 +49,17 @@ struct AlbumListView: View {
                         .font(.system(size: 25, weight: .bold))
                         .padding(.vertical)
                         .padding(.leading)
-            
+
+                    Picker("Sort by", selection: $sortOption) {
+                        ForEach(SortOption.allCases) { option in
+                            Text(option.rawValue).tag(option)
+                        }
+                    }
+                    .pickerStyle(.segmented)
+                    .padding(.horizontal)
+
                     List {
-                        ForEach(albums) { album in
+                        ForEach(sortedAlbums) { album in
                             NavigationLink(destination: AlbumDetailView(album: album)) {
                                 AlbumComponentView(album: .constant(album))
                             }
@@ -43,7 +71,6 @@ struct AlbumListView: View {
                     .scrollContentBackground(.hidden)
                     .listStyle(.plain)
                 }
-            
             }
             .navigationTitle("")
             .toolbar {
@@ -59,6 +86,12 @@ struct AlbumListView: View {
                     }
                 }
             }
+        }.onAppear {
+            for album in albums {
+                if !album.isLogged {
+                    album.dateLogged = Date()
+                }
+            }
         }
     }
 
@@ -68,7 +101,6 @@ struct AlbumListView: View {
         }
         try? modelContext.save()
     }
-
 }
 
 #Preview {

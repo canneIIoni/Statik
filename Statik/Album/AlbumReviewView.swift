@@ -104,9 +104,12 @@ struct AlbumReviewView: View {
             }
             ToolbarItem(placement: .topBarTrailing) {
                 Button {
+                    let dateFormatter = DateFormatter()
+                    dateFormatter.dateFormat = "dd/MM/yy"
                     album.review = review
                     rating = album.grade
-                    
+                    album.dateLogged = Date()
+                    album.isLogged = true
                     try? modelContext.save() // Ensure Core Data saves the changes
                     dismiss()
                 } label: {

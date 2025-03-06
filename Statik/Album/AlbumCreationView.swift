@@ -156,10 +156,16 @@ struct AlbumCreationView: View {
                         addAlbum()
                         dismiss()
                     } label: {
-                        Text("Save")
-                            .font(.system(size: 18, weight: .bold))
-                            .foregroundStyle(.systemRed)
-                    }
+                        if name == "" || artist == "" {
+                            Text("Save")
+                                .font(.system(size: 18, weight: .bold))
+                                .foregroundStyle(.secondaryText)
+                        } else {
+                            Text("Save")
+                                .font(.system(size: 18, weight: .bold))
+                                .foregroundStyle(.systemRed)
+                        }
+                    }.disabled(name == "" || artist == "")
                 }
             }
             .onTapGesture {
@@ -174,7 +180,7 @@ struct AlbumCreationView: View {
     }
     
     private func addAlbum() {
-        let album = Album(name: name, artist: artist, year: year, review: "", isLiked: false, grade: 0.0, image: selectedImage, songs: songs)
+        let album = Album(name: name, artist: artist, year: year, review: "", isLiked: false, grade: 0.0, image: selectedImage, songs: songs, dateLogged: Date())
         modelContext.insert(album)
         try? modelContext.save()
     }
