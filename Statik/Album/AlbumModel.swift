@@ -17,11 +17,13 @@ class Album {
     var year: String
     var review: String
     var isLiked: Bool
-    var grade: Double // Now supports half-star ratings
+    var grade: Double
     var imageData: Data?
+    var isLogged: Bool = false
+    var dateLogged: Date?
     @Relationship(deleteRule: .cascade) var songs: [Song] = []
 
-    init(name: String, artist: String, year: String, review: String, isLiked: Bool, grade: Double, image: UIImage? = nil, songs: [Song] = []) {
+    init(name: String, artist: String, year: String, review: String, isLiked: Bool, grade: Double, image: UIImage? = nil, songs: [Song] = [], dateLogged: Date) {
         self.name = name
         self.artist = artist
         self.year = year
@@ -30,6 +32,7 @@ class Album {
         self.grade = min(max(grade, 0), 5) // Ensure grade is between 0-5
         self.imageData = image?.jpegData(compressionQuality: 0.8)
         self.songs = songs
+        self.dateLogged = dateLogged
     }
 
 

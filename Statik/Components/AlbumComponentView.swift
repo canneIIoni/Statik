@@ -106,7 +106,7 @@ struct TitleHeightKey: PreferenceKey {
 
 #Preview {
     struct Preview: View {
-        @State var album = Album(name: "Reading, Writing and Arithmetic and poop", artist: "The Smiths", year: "1985", review: "berry gud", isLiked: true, grade: 4.5)
+        @State var album = Album(name: "Reading, Writing and Arithmetic and poop", artist: "The Smiths", year: "1985", review: "berry gud", isLiked: true, grade: 4.5, dateLogged: Date())
         var body: some View {
             AlbumComponentView(album: $album)
         }

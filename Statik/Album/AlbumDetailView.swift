@@ -50,21 +50,26 @@ struct AlbumDetailView: View {
                                     .frame(width: starSize, height: starSize)
                             }
                         }.padding(.top)
-
+                        
                         Spacer()
                     }.frame(height: 150)
                         .padding(.top, 5).padding(.leading, 10)
-
+                    
                     Spacer()
                 }.padding(.top, 20)
                 
-                HStack {
+                VStack(alignment: .leading) {
+                    if album.isLogged {
+                        Text("Date Logged: \(returnDate(album.dateLogged ?? Date()))")
+                            .font(.system(size: 14))
+                            .foregroundStyle(.secondaryText)
+                            .padding(.bottom, 5)
+                    }
                     Text(album.review)
                         .font(.system(size: 14))
                         .foregroundStyle(.secondaryText)
-                    Spacer()
                 }
-
+                
                 VStack(alignment: .leading) {
                     ForEach(album.songs.sorted { $0.trackNumber < $1.trackNumber }) { song in
                         NavigationLink(destination: SongDetailView(song: song, album: $album)) {
@@ -97,6 +102,13 @@ struct AlbumDetailView: View {
         .onDisappear {
             try? modelContext.save()
         }
+    }
+    
+    func returnDate (_ date: Date) -> String {
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "dd/MM/yy"
+        
+        return dateFormatter.string(from: album.dateLogged ?? Date())
     }
 }
 
