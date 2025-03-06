@@ -7,36 +7,26 @@
 
 
 import SwiftUI
-import PhotosUI
 
 struct AlbumDetailView: View {
     @Environment(\.modelContext) private var modelContext
     @State var album: Album
-    @State private var selectedItem: PhotosPickerItem? = nil
-    @State private var selectedImage: UIImage? = nil
     @State private var starSize: CGFloat = 25
+    @State private var smallStarSize: CGFloat = 17
     @State private var starEditable: Bool = false
+    @State private var imageSize: CGFloat = 147
 
     var body: some View {
         ScrollView {
             VStack {
                 HStack {
                     
-                    if let image = album.albumImage {
-                        Image(uiImage: image)
-                            .resizable()
-                            .frame(width: 147, height: 147)
-                            .scaledToFill()
-                    } else {
-                        Rectangle()
-                            .fill(Color.gray.opacity(0.3))
-                            .frame(width: 147, height: 147)
-                            .overlay(Text("No Image").foregroundColor(.gray))
-                    }
+                    ImageComponent(album: $album, imageSize: $imageSize)
 
                     VStack(alignment: .leading) {
                         Text("Album · \(album.year)")
                             .font(.caption)
+                            .foregroundStyle(.secondaryText)
 
                         Text(album.name)
                             .font(.system(size: 25, weight: .bold))
@@ -75,52 +65,35 @@ struct AlbumDetailView: View {
                     Spacer()
                 }
 
-                PhotosPicker(selection: $selectedItem, matching: .images) {
-                    Text("Select Album Cover")
-                }
-                .padding()
-                .onChange(of: selectedItem) { newItem in
-                    Task {
-                        if let data = try? await newItem?.loadTransferable(type: Data.self),
-                           let image = UIImage(data: data) {
-                            selectedImage = image
-                            album.imageData = image.jpegData(compressionQuality: 0.8)
-                            try? modelContext.save()
-                        }
-                    }
-                }
-                
-
                 VStack(alignment: .leading) {
-                    ForEach(album.songs) { song in
+                    ForEach(album.songs.sorted { $0.trackNumber < $1.trackNumber }) { song in
                         NavigationLink(destination: SongDetailView(song: song, album: $album)) {
-                            HStack {
-                                VStack(alignment: .leading) {
-                                    HStack {
-                                        Text(song.title)
-                                    }
-                                    if !song.review.isEmpty {
-                                        Text("“\(song.review)”")
-                                            .font(.subheadline)
-                                            .foregroundColor(.secondaryText)
-                                            .multilineTextAlignment(.leading)
-                                    }
-                                }
-                                Spacer()
-                                if song.isLiked {
-                                    Image(systemName: "heart.fill")
-                                        .foregroundColor(.systemRed)
-                                }
-                            }
+                            SongComponentView(song: .constant(song), smallStarSize: .constant(17))
                         }
-                        .padding(.vertical, 8) // Add spacing between items
-                        Divider() // Optional: Adds a subtle separator
+                        .padding(.vertical, 8)
+                        Divider()
                     }
                 }
                 .padding(.trailing)
             }.padding(.leading, 15)
         }
-        .background(Color.background.ignoresSafeArea())
+        .toolbar {
+            ToolbarItem(placement: .topBarTrailing) {
+                NavigationLink(destination: AlbumReviewView(album: $album)) {
+                    Text("Log")
+                        .font(.system(size: 18, weight: .bold))
+                        .foregroundStyle(.systemRed)
+                }
+            }
+        }
+        .background(
+            LinearGradient(
+                gradient: Gradient(colors: [Color.backgroundColorDark, Color.background]), // Adjust colors here
+                startPoint: .top,
+                endPoint: .center
+            )
+            .ignoresSafeArea()
+        )
         .onDisappear {
             try? modelContext.save()
         }

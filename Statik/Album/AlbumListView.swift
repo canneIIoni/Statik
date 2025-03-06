@@ -5,55 +5,58 @@
 //  Created by Luca on 28/02/25.
 //
 
-
 import SwiftUI
 import SwiftData
 
 struct AlbumListView: View {
     @Environment(\.modelContext) private var modelContext
     @Query private var albums: [Album] // Automatically fetches from SwiftData
+    @State private var starSize: CGFloat = 25
+    @State private var starEditable: Bool = false
 
     var body: some View {
         NavigationStack {
-            List {
-                ForEach(albums) { album in
-                    NavigationLink(destination: AlbumDetailView(album: album)) {
-                        HStack {
-                            if let image = album.albumImage {
-                                Image(uiImage: image)
-                                    .resizable()
-                                    .scaledToFit()
-                                    .frame(width: 50, height: 50)
-                                    .clipShape(RoundedRectangle(cornerRadius: 5))
-                            } else {
-                                Rectangle()
-                                    .fill(Color.gray.opacity(0.3))
-                                    .frame(width: 50, height: 50)
-                                    .clipShape(RoundedRectangle(cornerRadius: 5))
-                            }
+            ZStack {
+                LinearGradient(
+                    gradient: Gradient(colors: [Color.backgroundColorDark, Color.background]), // Adjust colors here
+                    startPoint: .top,
+                    endPoint: .center
+                )
+                .ignoresSafeArea()
 
-                            VStack(alignment: .leading) {
-                                Text(album.name)
-                                    .font(.headline)
-                                Text(album.artist)
-                                    .font(.subheadline)
-                                    .foregroundColor(.gray)
+                VStack(alignment: .leading) {
+                    Text("Logged Albums")
+                        .font(.system(size: 25, weight: .bold))
+                        .padding(.vertical)
+                        .padding(.leading)
+            
+                    List {
+                        ForEach(albums) { album in
+                            NavigationLink(destination: AlbumDetailView(album: album)) {
+                                AlbumComponentView(album: .constant(album))
                             }
-
-                            Spacer()
-
-                            if album.isLiked {
-                                Image(systemName: "heart.fill")
-                                    .foregroundColor(.systemRed)
-                            }
+                            .listRowSeparator(.hidden)
+                            .listRowBackground(Color.clear)
                         }
+                        .onDelete(perform: deleteAlbum) // Enables swipe-to-delete
                     }
+                    .scrollContentBackground(.hidden)
+                    .listStyle(.plain)
                 }
+            
             }
             .navigationTitle("")
             .toolbar {
-                Button(action: addSampleAlbum) {
-                    Image(systemName: "plus")
+                ToolbarItem(placement: .topBarLeading) {
+                    Text("Statik")
+                        .font(.system(size: 25, weight: .bold))
+                        .foregroundStyle(.systemRed)
+                }
+
+                ToolbarItem(placement: .topBarTrailing) {
+                    NavigationLink(destination: AlbumCreationView()) {
+                        Image(systemName: "plus")
+                    }
                 }
             }
         }
@@ -66,18 +69,9 @@ struct AlbumListView: View {
         try? modelContext.save()
     }
 
-    private func addSampleAlbum() {
-        let sampleAlbum = Album(name: "Sample Album", artist: "Sample Artist", year: "2024", review: "Great album!", isLiked: true, grade: 4, songs: [
-            Song(title: "Song 1", isLiked: true, grade: 5, review: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. "),
-            Song(title: "Song 2", isLiked: false, grade: 3, review: "Not bad.")
-        ])
-        modelContext.insert(sampleAlbum)
-        try? modelContext.save()
-    }
 }
 
 #Preview {
     AlbumListView()
         .modelContainer(for: Album.self, inMemory: true) // In-memory for preview
 }
-

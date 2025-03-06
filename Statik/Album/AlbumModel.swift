@@ -41,18 +41,4 @@ class Album {
     }
 }
 
-@Model
-class Song {
-    var id: UUID = UUID()
-    var title: String
-    var isLiked: Bool
-    var grade: Double
-    var review: String
 
-    init(title: String, isLiked: Bool, grade: Double, review: String) {
-        self.title = title
-        self.isLiked = isLiked
-        self.grade = min(max(grade, 0), 5) // Ensuring grade is between 0-5
-        self.review = review
-    }
-}
