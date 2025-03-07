@@ -14,9 +14,10 @@ struct SongComponentView: View {
     var body: some View {
         HStack {
             VStack(alignment: .leading) {
-                HStack {
+                HStack(alignment: .bottom) {
                     Text("\(song.title) ·")
                         .font(.system(size: 20))
+                        .multilineTextAlignment(.leading)
                     RatingView(
                         rating: Binding(
                             get: { song.grade },
@@ -25,9 +26,10 @@ struct SongComponentView: View {
                         starSize: $smallStarSize,
                         editable: .constant(false)
                     ).allowsHitTesting(false)
+                        .padding(.bottom, 3.2)
                 }
                 if !song.review.isEmpty {
-                    Text("“\(song.review)”")
+                    Text("\(song.review)")
                         .font(.system(size: 14))
                         .foregroundColor(.secondaryText)
                         .multilineTextAlignment(.leading)
