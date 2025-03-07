@@ -30,6 +30,7 @@ struct AlbumDetailView: View {
                         
                         Text(album.name)
                             .font(.system(size: 25, weight: .bold))
+                            .layoutPriority(1)
                         
                         Text(album.artist)
                             .font(.system(size: 16))
@@ -52,7 +53,7 @@ struct AlbumDetailView: View {
                         }.padding(.top)
                         
                         Spacer()
-                    }.frame(height: 150)
+                    }
                         .padding(.top, 5).padding(.leading, 10)
                     
                     Spacer()
