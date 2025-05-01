@@ -10,6 +10,7 @@ import SwiftUI
 
 struct AlbumDetailView: View {
     @Environment(\.modelContext) private var modelContext
+    
     @State var album: Album
     @State private var starSize: CGFloat = 25
     @State private var smallStarSize: CGFloat = 17
@@ -24,7 +25,7 @@ struct AlbumDetailView: View {
                     ImageComponent(album: $album, imageSize: $imageSize)
                     
                     VStack(alignment: .leading) {
-                        Text("Album · \(album.year)")
+                        Text("Album · \(album.year ?? "Unknown Year")")
                             .font(.caption)
                             .foregroundStyle(.secondaryText)
                         
@@ -35,22 +36,24 @@ struct AlbumDetailView: View {
                         Text(album.artist)
                             .font(.system(size: 16))
                         
-                        HStack {
-                            RatingView(rating: $album.grade, starSize: $starSize, editable: $starEditable)
-                            if album.isLiked {
-                                Image(systemName: "heart.circle.fill")
-                                    .resizable()
-                                    .foregroundColor(.systemRed)
-                                    .scaledToFit()
-                                    .frame(width: starSize, height: starSize)
-                            } else {
-                                Image(systemName: "heart.circle")
-                                    .resizable()
-                                    .foregroundColor(.systemRed)
-                                    .scaledToFit()
-                                    .frame(width: starSize, height: starSize)
-                            }
-                        }.padding(.top)
+                        if album.isSaved {
+                            HStack {
+                                RatingView(rating: $album.grade, starSize: $starSize, editable: $starEditable)
+                                if album.isLiked {
+                                    Image(systemName: "heart.circle.fill")
+                                        .resizable()
+                                        .foregroundColor(.systemRed)
+                                        .scaledToFit()
+                                        .frame(width: starSize, height: starSize)
+                                } else {
+                                    Image(systemName: "heart.circle")
+                                        .resizable()
+                                        .foregroundColor(.systemRed)
+                                        .scaledToFit()
+                                        .frame(width: starSize, height: starSize)
+                                }
+                            }.padding(.top)
+                        }
                         
                         Spacer()
                     }
@@ -76,22 +79,43 @@ struct AlbumDetailView: View {
                 
                 VStack(alignment: .leading) {
                     ForEach(album.songs.sorted { $0.trackNumber < $1.trackNumber }) { song in
-                        NavigationLink(destination: SongDetailView(song: song, album: $album)) {
-                            SongComponentView(song: .constant(song), smallStarSize: .constant(17))
+                        if album.isSaved {
+                            NavigationLink(destination: SongDetailView(song: song, album: $album)) {
+                                SongComponentView(song: .constant(song), smallStarSize: .constant(17))
+                                    .padding(.vertical, 8)
+                            }
+                        } else {
+                            SearchedSongComponentView(song: .constant(song))
+                                .padding(.vertical, 8)
                         }
-                        .padding(.vertical, 8)
+                        
                         Divider()
                     }
                 }
                 .padding(.trailing)
             }.padding(.leading, 15)
+
         }
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
-                NavigationLink(destination: AlbumReviewView(album: $album)) {
-                    Text("Log")
-                        .font(.system(size: 18, weight: .bold))
-                        .foregroundStyle(.systemRed)
+                if album.isSaved {
+                    NavigationLink(destination: AlbumReviewView(album: $album)) {
+                        Text("Log")
+                            .font(.system(size: 18, weight: .bold))
+                            .foregroundStyle(.systemRed)
+                    }
+                } else {
+                    Button {
+                        album.dateLogged = Date()
+                        album.isLogged = true
+                        album.isSaved = true
+                        modelContext.insert(album)
+                        try? modelContext.save()
+                    } label: {
+                        Text("Save")
+                            .font(.system(size: 18, weight: .bold))
+                            .foregroundStyle(.systemRed)
+                    }
                 }
             }
         }
@@ -115,4 +139,3 @@ struct AlbumDetailView: View {
         return dateFormatter.string(from: album.dateLogged ?? Date())
     }
 }
-
