@@ -22,7 +22,10 @@ struct AlbumDetailView: View {
             VStack {
                 HStack {
                     
-                    ImageComponent(album: $album, imageSize: $imageSize)
+                    VStack {
+                        ImageComponent(album: $album, imageSize: $imageSize)
+                        Spacer()
+                    }
                     
                     VStack(alignment: .leading) {
                         Text("Album · \(album.year ?? "Unknown Year")")
@@ -53,6 +56,7 @@ struct AlbumDetailView: View {
                                         .frame(width: starSize, height: starSize)
                                 }
                             }.padding(.top)
+                            .transition(.opacity)
                         }
                         
                         Spacer()
@@ -69,6 +73,12 @@ struct AlbumDetailView: View {
                                 .font(.system(size: 14))
                                 .foregroundStyle(.secondaryText)
                                 .padding(.bottom, 5)
+                        } else {
+                            // Yes, I know this is horrible practice but I can't think straight right now
+                            Text("Date Logged: \(returnDate(album.dateLogged ?? Date()))")
+                                .font(.system(size: 14))
+                                .foregroundStyle(.secondaryText.opacity(0))
+                                .padding(.bottom, 5)
                         }
                         Text(album.review)
                             .font(.system(size: 14))
@@ -83,13 +93,14 @@ struct AlbumDetailView: View {
                             NavigationLink(destination: SongDetailView(song: song, album: $album)) {
                                 SongComponentView(song: .constant(song), artist: .constant($album.wrappedValue.artist), smallStarSize: .constant(17))
                                     .padding(.vertical, 8)
+                                    .transition(.opacity)
                             }
                         } else {
-                            SearchedSongComponentView(song: .constant(song), artist: .constant($album.wrappedValue.artist))
+                            SearchedSongComponentView(song: .constant(song), artist: .constant($album.wrappedValue.artist), smallStarSize: .constant(17))
                                 .padding(.vertical, 8)
+                                .transition(.opacity)
                         }
-                        
-                        Divider()
+
                     }
                 }
                 .padding(.trailing)
@@ -103,19 +114,21 @@ struct AlbumDetailView: View {
                         Text("Log")
                             .font(.system(size: 18, weight: .bold))
                             .foregroundStyle(.systemRed)
-                    }
+                    }.transition(.opacity)
                 } else {
                     Button {
                         album.dateLogged = Date()
                         album.isLogged = true
-                        album.isSaved = true
+                        withAnimation {
+                            album.isSaved = true
+                        }
                         modelContext.insert(album)
                         try? modelContext.save()
                     } label: {
                         Text("Save")
                             .font(.system(size: 18, weight: .bold))
                             .foregroundStyle(.systemRed)
-                    }
+                    }.transition(.opacity)
                 }
             }
         }

@@ -75,11 +75,13 @@ struct AlbumComponentView: View {
                             .font(.subheadline)
                             .foregroundColor(.gray)
 
-                        RatingView(
-                            rating: Binding(get: { album.grade }, set: { album.grade = $0 }),
-                            starSize: $starSize,
-                            editable: .constant(false)
-                        ).allowsHitTesting(false)
+                        if album.isSaved {
+                            RatingView(
+                                rating: Binding(get: { album.grade }, set: { album.grade = $0 }),
+                                starSize: $starSize,
+                                editable: .constant(false)
+                            ).allowsHitTesting(false)
+                        }
 
                         if album.isLiked {
                             Image(systemName: "heart.fill")
