@@ -17,7 +17,7 @@ struct SearchedSongComponentView: View {
         HStack {
             VStack(alignment: .leading) {
                 HStack(alignment: .bottom) {
-                    Text("\(song.title) ·")
+                    Text("\(song.title) ")
                         .font(.system(size: 20))
                         .multilineTextAlignment(.leading)
                     RatingView(
