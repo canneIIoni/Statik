@@ -1,14 +1,13 @@
 //
-//  AlbumDetailView.swift
+//  AlbumSearchDetailView.swift
 //  Statik
 //
-//  Created by Luca on 28/02/25.
+//  Created by Luca on 01/05/25.
 //
-
 
 import SwiftUI
 
-struct AlbumDetailView: View {
+struct AlbumSearchDetailView: View {
     @Environment(\.modelContext) private var modelContext
     
     @State var album: Album
@@ -139,3 +138,4 @@ struct AlbumDetailView: View {
         return dateFormatter.string(from: album.dateLogged ?? Date())
     }
 }
+
