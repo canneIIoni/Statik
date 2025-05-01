@@ -7,6 +7,7 @@
 
 
 import SwiftUI
+import SwiftData
 
 struct AlbumDetailView: View {
     @Environment(\.modelContext) private var modelContext
@@ -16,6 +17,18 @@ struct AlbumDetailView: View {
     @State private var smallStarSize: CGFloat = 17
     @State private var starEditable: Bool = false
     @State private var imageSize: CGFloat = 147
+    
+    var isDuplicate: Bool {
+        let name = album.name
+        let artist = album.artist
+
+        let fetchDescriptor = FetchDescriptor<Album>(
+            predicate: #Predicate { $0.name == name && $0.artist == artist && $0.isSaved == true }
+        )
+
+        let result = try? modelContext.fetch(fetchDescriptor)
+        return !(result?.isEmpty ?? true)
+    }
 
     var body: some View {
         ScrollView {
@@ -127,8 +140,10 @@ struct AlbumDetailView: View {
                     } label: {
                         Text("Save")
                             .font(.system(size: 18, weight: .bold))
-                            .foregroundStyle(.systemRed)
-                    }.transition(.opacity)
+                            .foregroundStyle(isDuplicate ? .gray : .systemRed)
+                    }
+                    .disabled(isDuplicate)
+                    .transition(.opacity)
                 }
             }
         }
@@ -151,4 +166,6 @@ struct AlbumDetailView: View {
         
         return dateFormatter.string(from: album.dateLogged ?? Date())
     }
+    
+    
 }
