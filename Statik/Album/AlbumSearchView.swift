@@ -6,15 +6,55 @@
 //
 
 import SwiftUI
+import Combine
+
+class AlbumSearchViewModel: ObservableObject {
+    @Published var searchText = ""
+    @Published var searchResults: [DiscogsSearchResult] = []
+    @Published var isSearching = false
+
+    let discogsService = DiscogsService()
+    private var cancellables = Set<AnyCancellable>()
+
+    init() {
+        $searchText
+            .debounce(for: .milliseconds(200), scheduler: RunLoop.main)
+            .removeDuplicates()
+            .sink { [weak self] text in
+                guard let self = self else { return }
+                self.performSearch(for: text)
+            }
+            .store(in: &cancellables)
+    }
+
+    func performSearch(for text: String) {
+        let trimmed = text.trimmingCharacters(in: .whitespaces)
+        guard !trimmed.isEmpty else {
+            searchResults = []
+            return
+        }
+
+        isSearching = true
+        discogsService.searchAlbums(query: trimmed) { result in
+            DispatchQueue.main.async {
+                self.isSearching = false
+                switch result {
+                case .success(let albums):
+                    self.searchResults = albums
+                case .failure(let error):
+                    print("Search failed: \(error)")
+                    self.searchResults = []
+                }
+            }
+        }
+    }
+}
 
 struct AlbumSearchView: View {
     @Environment(\.modelContext) private var modelContext
     @Environment(\.dismiss) private var dismiss
-    @State private var searchText = ""
-    @State private var searchResults: [DiscogsSearchResult] = []
-    @State private var isSearching = false
-    private let discogsService = DiscogsService()
-    
+    @StateObject private var viewModel = AlbumSearchViewModel()
+
     @State private var selectedAlbum: Album?
     @State private var showDetail = false
 
@@ -22,27 +62,20 @@ struct AlbumSearchView: View {
         NavigationStack {
             VStack {
                 HStack {
-                    TextField("Search Discogs albums...", text: $searchText)
+                    TextField("Search Discogs albums...", text: $viewModel.searchText)
                         .padding(10)
                         .background(RoundedRectangle(cornerRadius: 10).fill(Color.backgroundColorDark))
-                        .onSubmit {
-                            searchAlbums()
-                        }
 
-                    Button(action: searchAlbums) {
-                        Image(systemName: "magnifyingglass")
-                            .foregroundColor(.secondary)
-                    }
                 }
                 .padding(.horizontal)
 
-                if isSearching {
+                if viewModel.isSearching {
                     ProgressView()
                         .padding()
                 }
 
                 List {
-                    ForEach(searchResults) { result in
+                    ForEach(viewModel.searchResults) { result in
                         VStack(alignment: .leading) {
                             AlbumComponentView(
                                 album: .constant(dummyAlbum(from: result)),
@@ -70,7 +103,6 @@ struct AlbumSearchView: View {
                 .ignoresSafeArea()
             )
 
-            // Corrected NavigationLink
             NavigationLink(
                 destination: selectedAlbum.map { album in
                     AlbumDetailView(album: album)
@@ -78,25 +110,7 @@ struct AlbumSearchView: View {
                 isActive: $showDetail,
                 label: { EmptyView() }
             )
-            .hidden() // Hidden but still functional
-            
-        }
-    }
-
-    private func searchAlbums() {
-        guard !searchText.isEmpty else { return }
-        isSearching = true
-        print("Searching for: \(searchText)")  // Debug print
-
-        discogsService.searchAlbums(query: searchText) { result in
-            isSearching = false
-            switch result {
-            case .success(let albums):
-                print("Found \(albums.count) results")
-                self.searchResults = albums
-            case .failure(let error):
-                print("Search failed: \(error)")
-            }
+            .hidden()
         }
     }
 
@@ -113,49 +127,51 @@ struct AlbumSearchView: View {
             dateLogged: Date()
         )
     }
-    
+
     private func fetchDiscogsAlbum(id: Int) {
-        isSearching = true
+        viewModel.isSearching = true
 
-        discogsService.fetchMasterRelease(id: id) { result in
-            isSearching = false
+        viewModel.discogsService.fetchMasterRelease(id: id) { result in
+            DispatchQueue.main.async {
+                viewModel.isSearching = false
 
-            switch result {
-            case .success(let master):
-                Task {
-                    var albumImage: UIImage? = nil
-                    if let imageURL = master.images?.first(where: { $0.type == "primary" })?.uri,
-                       let url = URL(string: imageURL) {
-                        do {
-                            let (data, _) = try await URLSession.shared.data(from: url)
-                            albumImage = UIImage(data: data)
-                        } catch {
-                            print("❌ Failed to load image: \(error)")
+                switch result {
+                case .success(let master):
+                    Task {
+                        var albumImage: UIImage? = nil
+                        if let imageURL = master.images?.first(where: { $0.type == "primary" })?.uri,
+                           let url = URL(string: imageURL) {
+                            do {
+                                let (data, _) = try await URLSession.shared.data(from: url)
+                                albumImage = UIImage(data: data)
+                            } catch {
+                                print("❌ Failed to load image: \(error)")
+                            }
                         }
+
+                        let songs = master.tracklist.enumerated().map { index, track in
+                            Song(title: track.title, isLiked: false, grade: 0.0, review: "", trackNumber: index + 1)
+                        }
+
+                        let album = Album(
+                            name: master.title,
+                            artist: master.artists.first?.name ?? "Unknown Artist",
+                            year: "\(master.year)",
+                            review: "",
+                            isLiked: false,
+                            grade: 0.0,
+                            image: albumImage,
+                            songs: songs,
+                            dateLogged: Date()
+                        )
+
+                        selectedAlbum = album
+                        showDetail = true
                     }
 
-                    let songs = master.tracklist.enumerated().map { index, track in
-                        Song(title: track.title, isLiked: false, grade: 0.0, review: "", trackNumber: index + 1)
-                    }
-
-                    let album = Album(
-                        name: master.title,
-                        artist: master.artists.first?.name ?? "Unknown Artist",
-                        year: "\(master.year)",
-                        review: "",
-                        isLiked: false,
-                        grade: 0.0,
-                        image: albumImage,
-                        songs: songs,
-                        dateLogged: Date()
-                    )
-
-                    selectedAlbum = album
-                    showDetail = true
+                case .failure(let error):
+                    print("❌ Failed to fetch album: \(error)")
                 }
-
-            case .failure(let error):
-                print("❌ Failed to fetch album: \(error)")
             }
         }
     }
@@ -164,4 +180,3 @@ struct AlbumSearchView: View {
 #Preview {
     AlbumSearchView()
 }
-
