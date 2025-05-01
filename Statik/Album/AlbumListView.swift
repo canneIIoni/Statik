@@ -75,9 +75,14 @@ struct AlbumListView: View {
             .navigationTitle("")
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
-                    Text("Statik")
-                        .font(.system(size: 25, weight: .bold))
-                        .foregroundStyle(.systemRed)
+                    HStack {
+                        Image(.statikLogo)
+                            .resizable()
+                            .frame(width: 25, height: 25)
+                        Text("Statik")
+                            .font(.system(size: 25, weight: .bold))
+                            .foregroundStyle(.systemRed)
+                    }
                 }
 
                 ToolbarItem(placement: .topBarTrailing) {

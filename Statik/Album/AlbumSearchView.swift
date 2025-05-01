@@ -57,6 +57,7 @@ struct AlbumSearchView: View {
 
     @State private var selectedAlbum: Album?
     @State private var showDetail = false
+    @State private var isLoadingDetail = false
 
     var body: some View {
         NavigationStack {
@@ -72,7 +73,6 @@ struct AlbumSearchView: View {
                     TextField("Search Discogs albums...", text: $viewModel.searchText)
                         .padding(10)
                         .background(RoundedRectangle(cornerRadius: 10).fill(Color.backgroundColorDark))
-
                 }
                 .padding(.horizontal)
 
@@ -92,7 +92,6 @@ struct AlbumSearchView: View {
                                 fetchDiscogsAlbum(id: result.id)
                             }
                         }
-                        .padding(.vertical, 8)
                         .listRowSeparator(.hidden)
                         .listRowBackground(Color.clear)
                     }
@@ -102,9 +101,14 @@ struct AlbumSearchView: View {
             }
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
-                    Text("Statik")
-                        .font(.system(size: 25, weight: .bold))
-                        .foregroundStyle(.systemRed)
+                    HStack {
+                        Image(.statikLogo)
+                            .resizable()
+                            .frame(width: 25, height: 25)
+                        Text("Statik")
+                            .font(.system(size: 25, weight: .bold))
+                            .foregroundStyle(.systemRed)
+                    }
                 }
             }
             .background(
@@ -142,12 +146,12 @@ struct AlbumSearchView: View {
     }
 
     private func fetchDiscogsAlbum(id: Int) {
-        viewModel.isSearching = true
-        selectedAlbum = nil // 👈 Force reset so NavigationLink detects a change
+        isLoadingDetail = true
+        selectedAlbum = nil
 
         viewModel.discogsService.fetchMasterRelease(id: id) { result in
             DispatchQueue.main.async {
-                viewModel.isSearching = false
+                isLoadingDetail = false // turn off regardless of result
 
                 switch result {
                 case .success(let master):
@@ -189,6 +193,7 @@ struct AlbumSearchView: View {
             }
         }
     }
+
 }
 
 #Preview {
