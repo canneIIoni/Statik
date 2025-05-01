@@ -34,7 +34,7 @@ struct SongDetailView: View {
                         .overlay(Text("No Image").foregroundColor(.gray))
                 }
                 VStack(alignment: .leading) {
-                    Text("\(album.artist) · \(album.year)")
+                    Text("\(album.artist) · \(album.year ?? "Unknown Year")")
                         .font(.caption)
                         .foregroundStyle(.secondaryText)
                     Text(song.title)

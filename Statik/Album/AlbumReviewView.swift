@@ -25,7 +25,7 @@ struct AlbumReviewView: View {
                 ImageComponent(album: $album, imageSize: $imageSize)
                 
                 VStack(alignment: .leading) {
-                    Text("Album · \(album.year)")
+                    Text("Album · \(album.year ?? "Unknown Year")")
                         .font(.caption)
                         .foregroundStyle(.secondaryText)
                     Text(album.name)
