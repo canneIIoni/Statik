@@ -20,85 +20,89 @@ struct AlbumComponentView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
-            HStack(alignment: .top, spacing: 12) {
 
-                // Try loading local image first, fallback to remote
-                if let localImage = album.albumImage {
-                    Image(uiImage: localImage)
-                        .resizable()
-                        .frame(width: imageSize, height: imageSize)
-                        .scaledToFill()
-                        .clipShape(RoundedRectangle(cornerRadius: 4))
-                } else if let remoteImageURL, let url = URL(string: remoteImageURL) {
-                    AsyncImage(url: url) { phase in
-                        switch phase {
-                        case .empty:
-                            ProgressView().frame(width: imageSize, height: imageSize)
-                        case .success(let image):
-                            image
-                                .resizable()
-                                .frame(width: imageSize, height: imageSize)
-                                .scaledToFill()
-                                .clipShape(RoundedRectangle(cornerRadius: 4))
-                        case .failure:
-                            fallbackImage
-                        @unknown default:
-                            fallbackImage
+                HStack(alignment: .top, spacing: 12) {
+                    
+                    // Try loading local image first, fallback to remote
+                    if let localImage = album.albumImage {
+                        Image(uiImage: localImage)
+                            .resizable()
+                            .frame(width: imageSize, height: imageSize)
+                            .scaledToFill()
+                            .clipShape(RoundedRectangle(cornerRadius: 4))
+                    } else if let remoteImageURL, let url = URL(string: remoteImageURL) {
+                        AsyncImage(url: url) { phase in
+                            switch phase {
+                            case .empty:
+                                ProgressView().frame(width: imageSize, height: imageSize)
+                            case .success(let image):
+                                image
+                                    .resizable()
+                                    .frame(width: imageSize, height: imageSize)
+                                    .scaledToFill()
+                                    .clipShape(RoundedRectangle(cornerRadius: 4))
+                            case .failure:
+                                fallbackImage
+                            @unknown default:
+                                fallbackImage
+                            }
                         }
+                    } else {
+                        fallbackImage
                     }
-                } else {
-                    fallbackImage
-                }
-
-                VStack(alignment: .leading, spacing: 4) {
-                    GeometryReader { geometry in
-                        Text(album.name)
-                            .font(.system(size: 20, weight: .bold))
-                            .multilineTextAlignment(.leading)
-                            .fixedSize(horizontal: false, vertical: true)
-                            .background(
-                                GeometryReader { titleGeometry in
-                                    Color.clear.preference(
-                                        key: TitleHeightKey.self,
-                                        value: titleGeometry.size.height
-                                    )
+                    
+                    VStack(alignment: .leading, spacing: 4) {
+                        GeometryReader { geometry in
+                            Text(album.name)
+                                .font(.system(size: 20, weight: .bold))
+                                .multilineTextAlignment(.leading)
+                                .fixedSize(horizontal: false, vertical: true)
+                                .background(
+                                    GeometryReader { titleGeometry in
+                                        Color.clear.preference(
+                                            key: TitleHeightKey.self,
+                                            value: titleGeometry.size.height
+                                        )
+                                    }
+                                )
+                        }
+                        .frame(height: isTitleTwoLines ? 48 : singleLineHeight)
+                        .onPreferenceChange(TitleHeightKey.self) { newHeight in
+                            isTitleTwoLines = newHeight > singleLineHeight
+                        }
+                        
+                            VStack(alignment: .leading) {
+                                Text(album.artist)
+                                    .font(.subheadline)
+                                    .foregroundColor(.gray)
+                                    .frame(height: 10)
+                                
+                                VStack{
+                                    if album.isSaved {
+                                        RatingView(
+                                            rating: Binding(get: { album.grade }, set: { album.grade = $0 }),
+                                            starSize: $starSize,
+                                            editable: .constant(false)
+                                        ).allowsHitTesting(false)
+                                    }
+                                    
+                                    if album.isLiked {
+                                        Image(systemName: "heart.fill")
+                                            .foregroundColor(.systemRed)
+                                    }
                                 }
-                            )
-                    }
-                    .frame(height: isTitleTwoLines ? 48 : singleLineHeight)
-                    .onPreferenceChange(TitleHeightKey.self) { newHeight in
-                        isTitleTwoLines = newHeight > singleLineHeight
-                    }
-
-                    HStack {
-                        Text(album.artist)
-                            .font(.subheadline)
-                            .foregroundColor(.gray)
-
-                        if album.isSaved {
-                            RatingView(
-                                rating: Binding(get: { album.grade }, set: { album.grade = $0 }),
-                                starSize: $starSize,
-                                editable: .constant(false)
-                            ).allowsHitTesting(false)
-                        }
-
-                        if album.isLiked {
-                            Image(systemName: "heart.fill")
-                                .foregroundColor(.systemRed)
+                            }
+                        
+                        if !isTitleTwoLines && !album.review.isEmpty {
+                            Text(album.review)
+                                .font(.system(size: 12))
+                                .foregroundColor(.gray)
+                                .lineLimit(2)
                         }
                     }
-
-                    if !isTitleTwoLines && !album.review.isEmpty {
-                        Text(album.review)
-                            .font(.system(size: 12))
-                            .foregroundColor(.gray)
-                            .lineLimit(2)
-                    }
+                    
+                    Spacer()
                 }
-
-                Spacer()
-            }
 
             if isTitleTwoLines && !album.review.isEmpty {
                 Text(album.review)
