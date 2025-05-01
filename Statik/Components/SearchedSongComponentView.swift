@@ -11,6 +11,8 @@ import SwiftUI
 struct SearchedSongComponentView: View {
     
     @Binding var song: Song
+    @Binding var artist: String
+    
     var body: some View {
         HStack {
             VStack(alignment: .leading) {
@@ -19,6 +21,10 @@ struct SearchedSongComponentView: View {
                         .font(.system(size: 20))
                         .multilineTextAlignment(.leading)
                 }
+                Text("\(artist)")
+                    .font(.system(size: 14))
+                    .foregroundColor(.gray)
+                    .multilineTextAlignment(.leading)
             }
             Spacer()
         }
