@@ -97,7 +97,10 @@ struct AlbumListView: View {
 
     private func deleteAlbum(at offsets: IndexSet) {
         for index in offsets {
-            modelContext.delete(albums[index])
+            let albumToDelete = sortedAlbums[index]
+            if let actualIndex = albums.firstIndex(where: { $0.id == albumToDelete.id }) {
+                modelContext.delete(albums[actualIndex])
+            }
         }
         try? modelContext.save()
     }

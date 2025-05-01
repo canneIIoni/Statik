@@ -81,11 +81,11 @@ struct AlbumDetailView: View {
                     ForEach(album.songs.sorted { $0.trackNumber < $1.trackNumber }) { song in
                         if album.isSaved {
                             NavigationLink(destination: SongDetailView(song: song, album: $album)) {
-                                SongComponentView(song: .constant(song), smallStarSize: .constant(17))
+                                SongComponentView(song: .constant(song), artist: .constant($album.wrappedValue.artist), smallStarSize: .constant(17))
                                     .padding(.vertical, 8)
                             }
                         } else {
-                            SearchedSongComponentView(song: .constant(song))
+                            SearchedSongComponentView(song: .constant(song), artist: .constant($album.wrappedValue.artist))
                                 .padding(.vertical, 8)
                         }
                         

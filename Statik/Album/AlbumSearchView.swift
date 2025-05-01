@@ -62,6 +62,13 @@ struct AlbumSearchView: View {
         NavigationStack {
             VStack {
                 HStack {
+                    Text("Search Albums")
+                        .font(.system(size: 25, weight: .bold))
+                        .padding(.vertical)
+                        .padding(.leading)
+                    Spacer()
+                }
+                HStack {
                     TextField("Search Discogs albums...", text: $viewModel.searchText)
                         .padding(10)
                         .background(RoundedRectangle(cornerRadius: 10).fill(Color.backgroundColorDark))
@@ -93,7 +100,13 @@ struct AlbumSearchView: View {
                 .scrollContentBackground(.hidden)
                 .listStyle(.plain)
             }
-            .navigationTitle("Search Discogs")
+            .toolbar {
+                ToolbarItem(placement: .topBarLeading) {
+                    Text("Statik")
+                        .font(.system(size: 25, weight: .bold))
+                        .foregroundStyle(.systemRed)
+                }
+            }
             .background(
                 LinearGradient(
                     gradient: Gradient(colors: [Color.backgroundColorDark, Color.background]),
@@ -130,6 +143,7 @@ struct AlbumSearchView: View {
 
     private func fetchDiscogsAlbum(id: Int) {
         viewModel.isSearching = true
+        selectedAlbum = nil // 👈 Force reset so NavigationLink detects a change
 
         viewModel.discogsService.fetchMasterRelease(id: id) { result in
             DispatchQueue.main.async {

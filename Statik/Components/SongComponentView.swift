@@ -10,6 +10,7 @@ import SwiftUI
 struct SongComponentView: View {
     
     @Binding var song: Song
+    @Binding var artist: String
     @Binding var smallStarSize: CGFloat
     var body: some View {
         HStack {
@@ -28,6 +29,10 @@ struct SongComponentView: View {
                     ).allowsHitTesting(false)
                         .padding(.bottom, 3.2)
                 }
+                Text("\(artist)")
+                    .font(.system(size: 14))
+                    .foregroundColor(.gray)
+                    .multilineTextAlignment(.leading)
                 if !song.review.isEmpty {
                     Text("\(song.review)")
                         .font(.system(size: 14))
