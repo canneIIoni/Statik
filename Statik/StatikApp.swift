@@ -12,7 +12,7 @@ import SwiftData
 struct StatikApp: App {
     var body: some Scene {
         WindowGroup {
-            AlbumListView()
+            AlbumTabView()
         }
         .modelContainer(for: Album.self) 
     }
