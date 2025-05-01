@@ -57,6 +57,7 @@ struct AlbumSearchView: View {
 
     @State private var selectedAlbum: Album?
     @State private var showDetail = false
+    @State private var isLoadingDetail = false
 
     var body: some View {
         NavigationStack {
@@ -72,7 +73,6 @@ struct AlbumSearchView: View {
                     TextField("Search Discogs albums...", text: $viewModel.searchText)
                         .padding(10)
                         .background(RoundedRectangle(cornerRadius: 10).fill(Color.backgroundColorDark))
-
                 }
                 .padding(.horizontal)
 
@@ -147,12 +147,12 @@ struct AlbumSearchView: View {
     }
 
     private func fetchDiscogsAlbum(id: Int) {
-        viewModel.isSearching = true
-        selectedAlbum = nil // 👈 Force reset so NavigationLink detects a change
+        isLoadingDetail = true
+        selectedAlbum = nil
 
         viewModel.discogsService.fetchMasterRelease(id: id) { result in
             DispatchQueue.main.async {
-                viewModel.isSearching = false
+                isLoadingDetail = false // turn off regardless of result
 
                 switch result {
                 case .success(let master):
@@ -194,6 +194,7 @@ struct AlbumSearchView: View {
             }
         }
     }
+
 }
 
 #Preview {
