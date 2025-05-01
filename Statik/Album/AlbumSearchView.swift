@@ -92,7 +92,6 @@ struct AlbumSearchView: View {
                                 fetchDiscogsAlbum(id: result.id)
                             }
                         }
-                        .padding(.vertical, 8)
                         .listRowSeparator(.hidden)
                         .listRowBackground(Color.clear)
                     }
