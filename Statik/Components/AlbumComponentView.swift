@@ -9,7 +9,7 @@ import SwiftUI
 
 struct AlbumComponentView: View {
     @Binding var album: Album
-    var remoteImageURL: String? = nil  // 🔥 NEW
+    var remoteImageURL: String? = nil
 
     @State var imageSize: CGFloat = 65
     @State private var isTitleTwoLines: Bool = false
@@ -22,7 +22,7 @@ struct AlbumComponentView: View {
         VStack(alignment: .leading, spacing: 8) {
             HStack(alignment: .top, spacing: 12) {
 
-                // 🔥 Try loading local image first, fallback to remote
+                // Try loading local image first, fallback to remote
                 if let localImage = album.albumImage {
                     Image(uiImage: localImage)
                         .resizable()
@@ -75,11 +75,13 @@ struct AlbumComponentView: View {
                             .font(.subheadline)
                             .foregroundColor(.gray)
 
-                        RatingView(
-                            rating: Binding(get: { album.grade }, set: { album.grade = $0 }),
-                            starSize: $starSize,
-                            editable: .constant(false)
-                        ).allowsHitTesting(false)
+                        if album.isSaved {
+                            RatingView(
+                                rating: Binding(get: { album.grade }, set: { album.grade = $0 }),
+                                starSize: $starSize,
+                                editable: .constant(false)
+                            ).allowsHitTesting(false)
+                        }
 
                         if album.isLiked {
                             Image(systemName: "heart.fill")
