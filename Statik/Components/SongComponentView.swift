@@ -34,8 +34,19 @@ struct SongComponentView: View {
                         .font(.system(size: 14))
                         .foregroundColor(.gray)
                         .multilineTextAlignment(.leading)
-                } else
-                {
+
+                } else {
+                    if song.title.count < 36 {
+                        Text("\(song.title) ")
+                            .font(.system(size: 20))
+                            .multilineTextAlignment(.leading)
+                    
+                        HStack {
+                            Text("\(artist)")
+                                .font(.system(size: 14))
+                                .foregroundColor(.gray)
+                                .multilineTextAlignment(.leading)
+                        }
 
                         Text("\(song.title) ")
                             .font(.system(size: 20))
