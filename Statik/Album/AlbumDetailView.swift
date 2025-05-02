@@ -17,6 +17,7 @@ struct AlbumDetailView: View {
     @State private var smallStarSize: CGFloat = 17
     @State private var starEditable: Bool = false
     @State private var imageSize: CGFloat = 147
+    @State private var opacityValue: Double = 0.0
     
     var isDuplicate: Bool {
         let name = album.name
@@ -52,24 +53,30 @@ struct AlbumDetailView: View {
                         Text(album.artist)
                             .font(.system(size: 16))
                         
-                        if album.isSaved {
-                            HStack {
-                                RatingView(rating: $album.grade, starSize: $starSize, editable: $starEditable)
-                                if album.isLiked {
-                                    Image(systemName: "heart.circle.fill")
-                                        .resizable()
-                                        .foregroundColor(.systemRed)
-                                        .scaledToFit()
-                                        .frame(width: starSize, height: starSize)
-                                } else {
-                                    Image(systemName: "heart.circle")
-                                        .resizable()
-                                        .foregroundColor(.systemRed)
-                                        .scaledToFit()
-                                        .frame(width: starSize, height: starSize)
-                                }
-                            }.padding(.top)
-                            .transition(.opacity)
+                        if album.name.count < 36 {
+                                HStack {
+                                    RatingView(rating: $album.grade, starSize: $starSize, editable: $starEditable)
+                                        .opacity(opacityValue)
+                                        .transition(.opacity)
+                                    if album.isLiked {
+                                        Image(systemName: "heart.circle.fill")
+                                            .resizable()
+                                            .foregroundColor(.systemRed)
+                                            .scaledToFit()
+                                            .frame(width: starSize, height: starSize)
+                                            .opacity(opacityValue)
+                                            .transition(.opacity)
+                                    } else {
+                                        Image(systemName: "heart.circle")
+                                            .resizable()
+                                            .foregroundColor(.systemRed)
+                                            .scaledToFit()
+                                            .frame(width: starSize, height: starSize)
+                                            .opacity(opacityValue)
+                                            .transition(.opacity)
+                                    }
+                                }.padding(.top)
+                                    .transition(.opacity)
                         }
                         
                         Spacer()
@@ -81,17 +88,45 @@ struct AlbumDetailView: View {
                 
                 HStack {
                     VStack(alignment: .leading) {
-                        if album.isLogged {
-                            Text("Date Logged: \(returnDate(album.dateLogged ?? Date()))")
-                                .font(.system(size: 14))
-                                .foregroundStyle(.secondaryText)
-                                .padding(.bottom, 5)
-                        } else {
-                            // Yes, I know this is horrible practice but I can't think straight right now
-                            Text("Date Logged: \(returnDate(album.dateLogged ?? Date()))")
-                                .font(.system(size: 14))
-                                .foregroundStyle(.secondaryText.opacity(0))
-                                .padding(.bottom, 5)
+                        HStack {
+                            if album.isLogged {
+                                Text("Date Logged: \(returnDate(album.dateLogged ?? Date()))")
+                                    .font(.system(size: 14))
+                                    .foregroundStyle(.secondaryText)
+                                    .padding(.bottom, 5)
+                            } else {
+                                // Yes, I know this is horrible practice but I can't think straight right now
+                                Text("Date Logged: \(returnDate(album.dateLogged ?? Date()))")
+                                    .font(.system(size: 14))
+                                    .foregroundStyle(.secondaryText.opacity(opacityValue))
+                                    .padding(.bottom, 5)
+                            }
+                            
+                            if album.name.count >= 36 {
+                                    HStack {
+                                        RatingView(rating: $album.grade, starSize: $starSize, editable: $starEditable)
+                                            .opacity(opacityValue)
+                                            .transition(.opacity)
+                                        if album.isLiked {
+                                            Image(systemName: "heart.circle.fill")
+                                                .resizable()
+                                                .foregroundColor(.systemRed)
+                                                .scaledToFit()
+                                                .frame(width: starSize, height: starSize)
+                                                .opacity(opacityValue)
+                                                .transition(.opacity)
+                                        } else {
+                                            Image(systemName: "heart.circle")
+                                                .resizable()
+                                                .foregroundColor(.systemRed)
+                                                .scaledToFit()
+                                                .frame(width: starSize, height: starSize)
+                                                .opacity(opacityValue)
+                                                .transition(.opacity)
+                                        }
+                                    }.padding(.bottom, 5)
+                                        .transition(.opacity)
+                            }
                         }
                         Text(album.review)
                             .font(.system(size: 14))
@@ -120,6 +155,14 @@ struct AlbumDetailView: View {
             }.padding(.leading, 15)
 
         }
+        .onAppear {
+            opacityValue = album.isSaved ? 1.0 : 0.0
+        }
+        .onChange(of: album.isSaved, { oldValue, newValue in
+            withAnimation {
+                opacityValue = newValue ? 1.0 : 0.0
+            }
+        })
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
                 if album.isSaved {
@@ -130,8 +173,13 @@ struct AlbumDetailView: View {
                     }.transition(.opacity)
                 } else {
                     Button {
+                        withAnimation {
+                            opacityValue = 1
+                        }
                         album.dateLogged = Date()
-                        album.isLogged = true
+                        withAnimation {
+                            album.isLogged = true
+                        }
                         withAnimation {
                             album.isSaved = true
                         }
