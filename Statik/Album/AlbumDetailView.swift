@@ -89,11 +89,18 @@ struct AlbumDetailView: View {
                 HStack {
                     VStack(alignment: .leading) {
                         HStack {
+                            if album.isLogged {
+                                Text("Date Logged: \(returnDate(album.dateLogged ?? Date()))")
+                                    .font(.system(size: 14))
+                                    .foregroundStyle(.secondaryText)
+                                    .padding(.bottom, 5)
+                            } else {
+                                // Yes, I know this is horrible practice but I can't think straight right now
                                 Text("Date Logged: \(returnDate(album.dateLogged ?? Date()))")
                                     .font(.system(size: 14))
                                     .foregroundStyle(.secondaryText.opacity(opacityValue))
                                     .padding(.bottom, 5)
-                                    .transition(.opacity)
+                            }
                             
                             if album.name.count >= 36 {
                                     HStack {
@@ -148,6 +155,14 @@ struct AlbumDetailView: View {
             }.padding(.leading, 15)
 
         }
+        .onAppear {
+            opacityValue = album.isSaved ? 1.0 : 0.0
+        }
+        .onChange(of: album.isSaved, { oldValue, newValue in
+            withAnimation {
+                opacityValue = newValue ? 1.0 : 0.0
+            }
+        })
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
                 if album.isSaved {
@@ -162,7 +177,9 @@ struct AlbumDetailView: View {
                             opacityValue = 1
                         }
                         album.dateLogged = Date()
-                        album.isLogged = true
+                        withAnimation {
+                            album.isLogged = true
+                        }
                         withAnimation {
                             album.isSaved = true
                         }
