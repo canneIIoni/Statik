@@ -9,6 +9,8 @@ import Testing
 @testable import Statik
 
 struct StatikTests {
+    
+    // MARK: - Discogs API tests
 
     @Test func testSearchAlbums() async throws {
         let json = """
