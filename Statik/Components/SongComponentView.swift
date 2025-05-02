@@ -34,6 +34,7 @@ struct SongComponentView: View {
                         .font(.system(size: 14))
                         .foregroundColor(.gray)
                         .multilineTextAlignment(.leading)
+
                 } else {
                     if song.title.count < 36 {
                         Text("\(song.title) ")
@@ -47,18 +48,17 @@ struct SongComponentView: View {
                                 .multilineTextAlignment(.leading)
                         }
 
-                    } else {
                         Text("\(song.title) ")
                             .font(.system(size: 20))
                             .multilineTextAlignment(.leading)
                             .padding(.bottom, 1)
+                    
+                    HStack {
                         Text("\(artist)")
                             .font(.system(size: 14))
                             .foregroundColor(.gray)
                             .multilineTextAlignment(.leading)
-                    }
-                    
-                    if song.title.count < 36 {
+                        
                         RatingView(
                             rating: Binding(
                                 get: { song.grade },
@@ -67,18 +67,6 @@ struct SongComponentView: View {
                             starSize: $smallStarSize,
                             editable: .constant(false)
                         ).allowsHitTesting(false)
-                            .offset(y: -5)
-                            .padding(.bottom, 3.2)
-                    } else {
-                        RatingView(
-                            rating: Binding(
-                                get: { song.grade },
-                                set: { song.grade = $0 }
-                            ),
-                            starSize: $smallStarSize,
-                            editable: .constant(false)
-                        ).allowsHitTesting(false)
-                            .offset(y: -5)
                             .padding(.bottom, 3.2)
                     }
                     
@@ -99,7 +87,7 @@ struct SongComponentView: View {
                             .font(.system(size: 14))
                             .foregroundColor(.secondaryText)
                             .multilineTextAlignment(.leading)
-                            .offset(y: -5)
+                            
                     }
                 }
             }
