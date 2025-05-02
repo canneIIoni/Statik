@@ -78,17 +78,21 @@ struct AlbumComponentView: View {
                                     .frame(height: 10)
                                 
                                 VStack{
-                                    if album.isSaved {
-                                        RatingView(
-                                            rating: Binding(get: { album.grade }, set: { album.grade = $0 }),
-                                            starSize: $starSize,
-                                            editable: .constant(false)
-                                        ).allowsHitTesting(false)
-                                    }
-                                    
-                                    if album.isLiked {
-                                        Image(systemName: "heart.fill")
-                                            .foregroundColor(.systemRed)
+                                    HStack{
+                                        if album.isSaved {
+                                            RatingView(
+                                                rating: Binding(get: { album.grade }, set: { album.grade = $0 }),
+                                                starSize: $starSize,
+                                                editable: .constant(false)
+                                            ).allowsHitTesting(false)
+                                        }
+                                        
+                                        if album.isLiked {
+                                            Image(systemName: "heart.fill")
+                                                .foregroundColor(.systemRed)
+                                                .scaledToFit()
+                                                .frame(width: 17, height: 17)
+                                        }
                                     }
                                 }
                             }
