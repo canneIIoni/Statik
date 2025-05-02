@@ -8,47 +8,6 @@
 import SwiftUI
 import Combine
 
-class AlbumSearchViewModel: ObservableObject {
-    @Published var searchText = ""
-    @Published var searchResults: [DiscogsSearchResult] = []
-    @Published var isSearching = false
-
-    let discogsService = DiscogsService()
-    private var cancellables = Set<AnyCancellable>()
-
-    init() {
-        $searchText
-            .debounce(for: .milliseconds(200), scheduler: RunLoop.main)
-            .removeDuplicates()
-            .sink { [weak self] text in
-                guard let self = self else { return }
-                self.performSearch(for: text)
-            }
-            .store(in: &cancellables)
-    }
-
-    func performSearch(for text: String) {
-        let trimmed = text.trimmingCharacters(in: .whitespaces)
-        guard !trimmed.isEmpty else {
-            searchResults = []
-            return
-        }
-
-        isSearching = true
-        discogsService.searchAlbums(query: trimmed) { result in
-            DispatchQueue.main.async {
-                self.isSearching = false
-                switch result {
-                case .success(let albums):
-                    self.searchResults = albums
-                case .failure(let error):
-                    print("Search failed: \(error)")
-                    self.searchResults = []
-                }
-            }
-        }
-    }
-}
 
 struct AlbumSearchView: View {
     @Environment(\.modelContext) private var modelContext
@@ -149,50 +108,52 @@ struct AlbumSearchView: View {
         isLoadingDetail = true
         selectedAlbum = nil
 
-        viewModel.discogsService.fetchMasterRelease(id: id) { result in
-            DispatchQueue.main.async {
-                isLoadingDetail = false // turn off regardless of result
+        Task {
+            do {
+                let master = try await viewModel.discogsService.fetchMasterRelease(id: id)
 
-                switch result {
-                case .success(let master):
-                    Task {
-                        var albumImage: UIImage? = nil
-                        if let imageURL = master.images?.first(where: { $0.type == "primary" })?.uri,
-                           let url = URL(string: imageURL) {
-                            do {
-                                let (data, _) = try await URLSession.shared.data(from: url)
-                                albumImage = UIImage(data: data)
-                            } catch {
-                                print("❌ Failed to load image: \(error)")
-                            }
-                        }
-
-                        let songs = master.tracklist.enumerated().map { index, track in
-                            Song(title: track.title, isLiked: false, grade: 0.0, review: "", trackNumber: index + 1)
-                        }
-
-                        let album = Album(
-                            name: master.title,
-                            artist: master.artists.first?.name ?? "Unknown Artist",
-                            year: "\(master.year)",
-                            review: "",
-                            isLiked: false,
-                            grade: 0.0,
-                            image: albumImage,
-                            songs: songs,
-                            dateLogged: Date()
-                        )
-
-                        selectedAlbum = album
-                        showDetail = true
+                var albumImage: UIImage? = nil
+                if let imageURL = master.images?.first(where: { $0.type == "primary" })?.uri,
+                   let url = URL(string: imageURL) {
+                    do {
+                        let (data, _) = try await URLSession.shared.data(from: url)
+                        albumImage = UIImage(data: data)
+                    } catch {
+                        print("❌ Failed to load image: \(error)")
                     }
+                }
 
-                case .failure(let error):
+                let songs = master.tracklist.enumerated().map { index, track in
+                    Song(title: track.title, isLiked: false, grade: 0.0, review: "", trackNumber: index + 1)
+                }
+
+                let album = Album(
+                    name: master.title,
+                    artist: master.artists.first?.name ?? "Unknown Artist",
+                    year: "\(master.year)",
+                    review: "",
+                    isLiked: false,
+                    grade: 0.0,
+                    image: albumImage,
+                    songs: songs,
+                    dateLogged: Date()
+                )
+
+                await MainActor.run {
+                    selectedAlbum = album
+                    showDetail = true
+                    isLoadingDetail = false
+                }
+
+            } catch {
+                await MainActor.run {
                     print("❌ Failed to fetch album: \(error)")
+                    isLoadingDetail = false
                 }
             }
         }
     }
+
 
 }
 

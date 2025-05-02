@@ -39,11 +39,13 @@ struct SongComponentView: View {
                         Text("\(song.title) ")
                             .font(.system(size: 20))
                             .multilineTextAlignment(.leading)
-                            .padding(.bottom, 1)
-                        Text("\(artist)")
-                            .font(.system(size: 14))
-                            .foregroundColor(.gray)
-                            .multilineTextAlignment(.leading)
+                    
+                        HStack {
+                            Text("\(artist)")
+                                .font(.system(size: 14))
+                                .foregroundColor(.gray)
+                                .multilineTextAlignment(.leading)
+                        }
 
                     } else {
                         Text("\(song.title) ")

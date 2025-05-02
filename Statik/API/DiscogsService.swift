@@ -7,6 +7,20 @@
 
 import Foundation
 
+// MARK: - Networking Abstraction
+
+protocol NetworkSession {
+    func data(for request: URLRequest) async throws -> (Data, URLResponse)
+}
+
+extension URLSession: NetworkSession {
+    func data(for request: URLRequest) async throws -> (Data, URLResponse) {
+        try await data(for: request, delegate: nil)
+    }
+}
+
+// MARK: - Discogs Models
+
 struct DiscogsMasterRelease: Codable {
     let title: String
     let year: Int
@@ -32,85 +46,43 @@ struct DiscogsTrack: Codable {
     let position: String?
 }
 
+// MARK: - Discogs Service
+
 class DiscogsService {
     private let baseURL = "https://api.discogs.com"
     private let token = "SCTuZavpfmnVCmsVaDPajUmnoVCJrlRViwRFPuvE"
-    
-    func searchAlbums(query: String, completion: @escaping (Result<[DiscogsSearchResult], Error>) -> Void) {
+    private let session: NetworkSession
+
+    init(session: NetworkSession = URLSession.shared) {
+        self.session = session
+    }
+
+    func searchAlbums(query: String) async throws -> [DiscogsSearchResult] {
         var components = URLComponents(string: "\(baseURL)/database/search")!
         components.queryItems = [
             URLQueryItem(name: "q", value: query),
             URLQueryItem(name: "type", value: "master")
         ]
 
-        guard let url = components.url else { return }
-
+        let url = components.url!
         var request = URLRequest(url: url)
         request.setValue("Discogs token=\(token)", forHTTPHeaderField: "Authorization")
 
-        let task = URLSession.shared.dataTask(with: request) { data, response, error in
-            if let error = error {
-                DispatchQueue.main.async { completion(.failure(error)) }
-                return
-            }
-
-            guard let data = data else {
-                DispatchQueue.main.async {
-                    completion(.failure(NSError(domain: "No data", code: 0)))
-                }
-                return
-            }
-
-            do {
-                let decoded = try JSONDecoder().decode(DiscogsSearchResponse.self, from: data)
-                DispatchQueue.main.async {
-                    completion(.success(decoded.results))
-                }
-            } catch {
-                DispatchQueue.main.async {
-                    completion(.failure(error))
-                }
-            }
-        }
-
-        task.resume()
+        let (data, _) = try await session.data(for: request)
+        let decoded = try JSONDecoder().decode(DiscogsSearchResponse.self, from: data)
+        return decoded.results
     }
 
-    func fetchMasterRelease(id: Int, completion: @escaping (Result<DiscogsMasterRelease, Error>) -> Void) {
-        guard let url = URL(string: "\(baseURL)/masters/\(id)") else { return }
-
+    func fetchMasterRelease(id: Int) async throws -> DiscogsMasterRelease {
+        let url = URL(string: "\(baseURL)/masters/\(id)")!
         var request = URLRequest(url: url)
         request.setValue("Discogs token=\(token)", forHTTPHeaderField: "Authorization")
 
-        let task = URLSession.shared.dataTask(with: request) { data, response, error in
-            if let error = error {
-                DispatchQueue.main.async {
-                    completion(.failure(error))
-                }
-                return
-            }
-
-            guard let data = data else {
-                DispatchQueue.main.async {
-                    completion(.failure(NSError(domain: "No data", code: 0)))
-                }
-                return
-            }
-
-            do {
-                let decoded = try JSONDecoder().decode(DiscogsMasterRelease.self, from: data)
-                DispatchQueue.main.async {
-                    completion(.success(decoded))
-                }
-            } catch {
-                DispatchQueue.main.async {
-                    completion(.failure(error))
-                }
-            }
-        }
-
-        task.resume()
+        let (data, _) = try await session.data(for: request)
+        return try JSONDecoder().decode(DiscogsMasterRelease.self, from: data)
     }
 }
+
+
 
 
