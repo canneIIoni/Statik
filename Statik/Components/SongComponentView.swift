@@ -91,15 +91,15 @@ struct SongComponentView: View {
                         }
                     }
                 }
-                Spacer()
-                if song.isLiked {
-                    Image(systemName: "heart.circle.fill")
-                        .foregroundColor(.systemRed)
-                }
-                Image(systemName: "chevron.right")
-                    .font(.system(size: 13, weight: .bold))
-                    .foregroundColor(.secondary).opacity(0.5)
             }
+            Spacer()
+            if song.isLiked {
+                Image(systemName: "heart.circle.fill")
+                    .foregroundColor(.systemRed)
+            }
+            Image(systemName: "chevron.right")
+                .font(.system(size: 13, weight: .bold))
+                .foregroundColor(.secondary).opacity(0.5)
         }
     }
 }
